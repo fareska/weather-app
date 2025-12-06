@@ -1,6 +1,6 @@
 # Weather Web Server
 
-Express.js web server that provides REST API endpoints for querying weather data stored in MongoDB.
+Express.js web server that provides REST API endpoints for querying weather data stored in MongoDB. The project includes a data ingestion service (`src/data-manager.ts`) that fetches weather data from an external API and populates MongoDB with batch data. The ingestion service runs continuously, processing batches every 5 minutes and managing the lifecycle of weather data batches. For detailed instructions on running the data ingestion service, see the [Running the Data Manager](#running-the-data-manager) section.
 
 ## Prerequisites
 
@@ -130,12 +130,87 @@ webserver/
 - `LOG_LEVEL` - Logging level (debug/info/warn/error)
 - `WEATHER_API_BASE_URL` - External API URL for batch status updates (optional)
 
+## Running the Data Manager
+
+The **Data Manager** (`src/data-manager.ts`) is a background service that fetches weather data from an external API and populates MongoDB. It runs continuously, processing batches every 5 minutes.
+
+### What it does
+
+- Fetches available weather data batches from the external weather API
+- Processes and stores weather data in MongoDB
+- Manages batch lifecycle (active, inactive, deleted)
+- Automatically cleans up old batches (keeps only the latest 3 active batches)
+- Handles errors and batch unavailability gracefully
+
+### Prerequisites
+
+- MongoDB must be running (see [Setup and Running](#setup-and-running) step 2)
+- Environment variables configured (see [Setup and Running](#setup-and-running) step 4)
+- Dependencies installed (`pnpm install`)
+
+### Running the Data Manager
+
+1. **Ensure MongoDB is running:**
+   ```bash
+   docker-compose up -d
+   ```
+
+2. **Ensure environment variables are set:**
+   Make sure your `.env` file includes:
+   ```env
+   MONGODB_URI=mongodb://localhost:27017/weather
+   ```
+
+3. **Run the Data Manager:**
+   ```bash
+   pnpm data-manager
+   ```
+
+   The data manager will:
+   - Connect to MongoDB
+   - Fetch and process batches immediately
+   - Continue processing batches every 5 minutes
+   - Log all operations to the console
+
+### Data Manager Behavior
+
+- **Initial Run:** Processes all available batches from the weather API
+- **Subsequent Runs:** Only processes new batches that haven't been seen before
+- **Batch Management:**
+  - Keeps the latest 3 active batches based on forecast time
+  - Automatically deletes older batches when new ones are completed
+  - Marks batches as inactive if they're no longer available from the API
+- **Error Handling:**
+  - Handles 404 errors (batch became unavailable) by cleaning up the batch
+  - Continues processing other batches even if one fails
+  - Logs all errors with detailed context
+
+### Monitoring
+
+The data manager logs all operations in structured JSON format:
+- Batch processing start/completion
+- Data insertion progress
+- Errors and warnings
+- Batch lifecycle changes
+
+Watch the console output to monitor the data manager's activity.
+
+### Running in Production
+
+For production deployments, consider:
+- Running the data manager as a background service (using `pm2`, `systemd`, or similar)
+- Setting up log rotation for the console output
+- Monitoring the service health and restarting on failure
+- Ensuring MongoDB connection is stable and has proper retry logic
+
 ## Data Requirements
 
 The web server reads data from MongoDB that must be populated by the pipeline service. The server queries:
 
 - **Latest 3 active batches** for weather data endpoints
 - **All batches** for the batches metadata endpoint
+
+**Note:** The data manager (`src/data-manager.ts`) can be used to populate MongoDB with weather data instead of relying on the pipeline service.
 
 ## Deployment
 
