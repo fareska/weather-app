@@ -6,8 +6,8 @@ Express.js web server that provides REST API endpoints for querying weather data
 
 - Node.js 20.10.0 (or any 20.x version)
 - pnpm 8.15.0 (or any 8.x version)
-- MongoDB (cloud instance or local)
-- MongoDB database populated by the pipeline service
+- Docker and Docker Compose (for running MongoDB locally)
+- MongoDB (cloud instance or local via Docker)
 
 ## Setup and Running
 
@@ -16,27 +16,46 @@ Express.js web server that provides REST API endpoints for querying weather data
    npm install -g pnpm
    ```
 
-2. **Install dependencies:**
+2. **Start MongoDB using Docker Compose:**
+   ```bash
+   docker-compose up -d
+   ```
+   
+   This will start a MongoDB container on port `27017`. The database will be initialized with the `weather` database.
+   
+   To stop MongoDB:
+   ```bash
+   docker-compose down
+   ```
+   
+   To stop and remove volumes (this will delete all data):
+   ```bash
+   docker-compose down -v
+   ```
+
+3. **Install dependencies:**
    ```bash
    pnpm install
    ```
 
-3. **Configure environment variables:**
+4. **Configure environment variables:**
    Create a `.env` file:
    ```env
-   MONGODB_URI=mongodb://your-mongodb-uri/weather
+   MONGODB_URI=mongodb://localhost:27017/weather
    PORT=3000
    NODE_ENV=development
    LOG_LEVEL=info
    WEATHER_API_BASE_URL=https://us-east1-climacell-platform-production.cloudfunctions.net/weather-data
    ```
+   
+   **Note:** If using a cloud MongoDB instance instead of the local Docker container, update `MONGODB_URI` with your cloud MongoDB connection string.
 
-4. **Build the project:**
+5. **Build the project:**
    ```bash
    pnpm build
    ```
 
-5. **Start the server:**
+6. **Start the server:**
    ```bash
    pnpm start
    ```
@@ -97,6 +116,7 @@ webserver/
 │   └── utils/
 │       ├── logger.ts            # Logger utility
 │       └── query-helpers.ts     # MongoDB query helpers
+├── docker-compose.yml          # MongoDB Docker Compose configuration
 ├── package.json
 ├── tsconfig.json
 └── README.md
