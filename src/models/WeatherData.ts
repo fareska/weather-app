@@ -29,7 +29,6 @@ const WeatherDataSchema: Schema = new Schema({
   forecastTime: {
     type: Date,
     required: true,
-    index: true,
   },
   temperature: {
     type: Number,
@@ -46,9 +45,6 @@ const WeatherDataSchema: Schema = new Schema({
 }, {
   timestamps: true,
 });
-
-WeatherDataSchema.index({ latitude: 1, longitude: 1, batchId: 1 }, { unique: true });
-WeatherDataSchema.index({ batchId: 1, forecastTime: 1 });
 
 export const WeatherData: Model<IWeatherData> = mongoose.model<IWeatherData>('WeatherData', WeatherDataSchema);
 

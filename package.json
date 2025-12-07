@@ -10,6 +10,7 @@
     "start": "node dist/index.js",
     "dev": "nodemon --exec 'node --loader ts-node/esm' src/index.ts",
     "data-manager": "node --loader ts-node/esm src/data-manager.ts",
+    "data-manager:cron": "RUN_AS_CRON_JOB=true node dist/data-manager.js",
     "clear-db": "node --loader ts-node/esm src/scripts/clear-db.ts",
     "lint": "eslint . --ext .ts"
   },

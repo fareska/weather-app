@@ -5,6 +5,9 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const isCompiled = __dirname.includes('/dist/') || __dirname.includes('\\dist\\');
+const fileExtension = isCompiled ? 'js' : 'ts';
+
 const options: swaggerJsdoc.Options = {
   definition: {
     openapi: '3.0.0',
@@ -21,8 +24,8 @@ const options: swaggerJsdoc.Options = {
     ],
   },
   apis: [
-    path.join(__dirname, '../routes/*.ts'),
-    path.join(__dirname, '../controllers/*.ts'),
+    path.join(__dirname, `../routes/*.${fileExtension}`),
+    path.join(__dirname, `../controllers/*.${fileExtension}`),
   ],
 };
 

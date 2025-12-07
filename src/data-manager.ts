@@ -314,6 +314,13 @@ const main = async () => {
 
         await processBatches();
 
+        const runAsCronJob = process.env.RUN_AS_CRON_JOB === 'true';
+        if (runAsCronJob) {
+            log.info({ message: 'Running as cron job - exiting after single execution' }, 'main');
+            await disconnectDB();
+            process.exit(0);
+        }
+
         const INTERVAL__5M_MS = 5 * 60 * 1000;
         log.info({ message: `Setting up batch processing interval: every ${INTERVAL__5M_MS / 1000 / 60} minutes` }, 'main');
         intervalId = setInterval(async () => {
