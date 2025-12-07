@@ -18,7 +18,9 @@ const app: Express = express();
 const port = process.env.PORT || 3000;
 const mongodbUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/weather';
 
-app.use(cors());
+if (process.env.NODE_ENV !== 'production') {
+  app.use(cors());
+}
 app.use(express.json());
 app.use(requestLogger);
 

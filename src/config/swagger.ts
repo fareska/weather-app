@@ -8,6 +8,28 @@ const __dirname = path.dirname(__filename);
 const isCompiled = __dirname.includes('/dist/') || __dirname.includes('\\dist\\');
 const fileExtension = isCompiled ? 'js' : 'ts';
 
+// Determine the server URL based on environment
+const getServerUrl = (): string => {
+  if (process.env.NODE_ENV === 'production') {
+    if (process.env.APP_URL) {
+      return process.env.APP_URL;
+    }
+    return '/';
+  }
+  return `http://localhost:${process.env.PORT || 3000}`;
+};
+
+const serverUrl = getServerUrl();
+const servers = [
+  {
+    url: serverUrl,
+    description:
+      process.env.NODE_ENV === 'production'
+        ? 'Production server'
+        : 'Development server',
+  },
+];
+
 const options: swaggerJsdoc.Options = {
   definition: {
     openapi: '3.0.0',
@@ -16,12 +38,7 @@ const options: swaggerJsdoc.Options = {
       version: '1.0.0',
       description: 'REST API for querying weather forecast data stored in MongoDB',
     },
-    servers: [
-      {
-        url: `http://localhost:${process.env.PORT || 3000}`,
-        description: 'Development server',
-      },
-    ],
+    servers,
   },
   apis: [
     path.join(__dirname, `../routes/*.${fileExtension}`),
@@ -42,12 +59,7 @@ try {
       version: '1.0.0',
       description: 'REST API for querying weather forecast data stored in MongoDB',
     },
-    servers: [
-      {
-        url: `http://localhost:${process.env.PORT || 3000}`,
-        description: 'Development server',
-      },
-    ],
+    servers,
     paths: {},
   } as any;
 }
